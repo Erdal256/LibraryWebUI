@@ -8,52 +8,52 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework.Contexts;
 using Entities.Entities;
 using Business.Services.Bases;
+using Business.Models;
+using Core.Business.Models.Results;
 
 namespace LibraryWebUI.Controllers
 {
     public class CategoriesController : Controller
     {
-        private readonly LibraryContext _context;
-        
         private readonly ICategoryService _categoryService;
 
         public CategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
-        public CategoriesController(LibraryContext context)
-        {
-            _context = context;
-        }
 
         // GET: Categories
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            var query = _categoryService.GetQuery();
+            var model = query.ToList();
+            return View(model);
         }
+
 
         // GET: Categories/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+        //    var category = await _context.Categories
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (category == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(category);
-        }
+        //    return View(category);
+        //}
 
         // GET: Categories/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new CategoryModel();
+            return View(model);
         }
 
         // POST: Categories/Create
@@ -61,29 +61,53 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Id,Guid")] Category category)
+        public IActionResult Create(CategoryModel category)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var result = _categoryService.Add(category);
+                if (result.Status == ResultStatus.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                if (result.Status == ResultStatus.Error)
+                {
+                    ModelState.AddModelError("", result.Message);
+                    return View(category);
+                }
+                throw new Exception(result.Message);
             }
             return View(category);
         }
 
+
         // GET: Categories/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        //public async Task<IActionResult> Edit(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var category = await _context.Categories.FindAsync(id);
+        //    if (category == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(category);
+        //}
+        public IActionResult Edit (int ? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
+            var query = _categoryService.GetQuery();
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = query.SingleOrDefault(c => c.Id == id.Value);
             if (category == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
             return View(category);
         }
@@ -93,68 +117,61 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Description,Id,Guid")] Category category)
+        public IActionResult Edit(CategoryModel category)
         {
-            if (id != category.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                var result = _categoryService.Update(category);
+                if (result.Status == ResultStatus.Success)
                 {
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (result.Status == ResultStatus.Error)
                 {
-                    if (!CategoryExists(category.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", result.Message);
+                    return View(category);
                 }
-                return RedirectToAction(nameof(Index));
+
+                throw new Exception(result.Message);
             }
             return View(category);
         }
 
         // GET: Categories/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int id)
         {
-            if (id == null)
+            var deleteResult = _categoryService.Delete(id);
+            if (deleteResult.Status == ResultStatus.Success)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
+            if (deleteResult.Status == ResultStatus.Error)
             {
-                return NotFound();
+                ModelState.AddModelError("", deleteResult.Message);
+                var categoryQuery = _categoryService.GetQuery();
+
+                var category = categoryQuery.SingleOrDefault(c => c.Id == id);
+                return View("Edit", category);
             }
-
-            return View(category);
+            throw new Exception(deleteResult.Message);
         }
 
-        // POST: Categories/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+        //// POST: Categories/Delete/5
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> DeleteConfirmed(int id)
+        //{
+        //    var category = await _context.Categories.FindAsync(id);
+        //    _context.Categories.Remove(category);
+        //    await _context.SaveChangesAsync();
+        //    return RedirectToAction(nameof(Index));
+        //}
 
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.Id == id);
-        }
+        //private bool CategoryExists(int id)
+        //{
+        //    return _context.Categories.Any(e => e.Id == id);
+        //}
     }
 }
