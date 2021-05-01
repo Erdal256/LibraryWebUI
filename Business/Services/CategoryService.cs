@@ -22,7 +22,7 @@ namespace Business.Services
         {
             try
             {
-                if (_categoryRepository.GetEntityQuery().Any(c => c.Name.ToUpper() == model.Name.ToUpper().Trim()))
+                if (_categoryRepository.EntityQuery().Any(c => c.Name.ToUpper() == model.Name.ToUpper().Trim()))
                     return new ErrorResult("Category with the same name exists!");
                 var entity = new Category()
                 {
@@ -43,7 +43,7 @@ namespace Business.Services
         {
             try
             {
-                var category = _categoryRepository.GetEntityQuery(c => c.Id == id, "Books").SingleOrDefault();
+                var category = _categoryRepository.EntityQuery(c => c.Id == id, "Books").SingleOrDefault();
 
                 if (category.Books != null && category.Books.Count > 0)
                 {
@@ -68,12 +68,13 @@ namespace Business.Services
         public IQueryable<CategoryModel> GetQuery()
         {
             
-                var query = _categoryRepository.GetEntityQuery("Books").OrderBy(c => c.Name).Select(c => new CategoryModel()
+                var query = _categoryRepository.EntityQuery("Books").OrderBy(c => c.Name).Select(c => new CategoryModel()
                 {
                     Id = c.Id,
                     Guid = c.Guid,
                     Name = c.Name,
                     Description = c.Description,
+                    BookCount =c.Books.Count,
                 });
                 return query;
             
@@ -84,9 +85,9 @@ namespace Business.Services
 
             try
             {
-                if (_categoryRepository.GetEntityQuery().Any(c => c.Name.ToUpper() == model.Name.ToUpper().Trim() && c.Id != model.Id))
+                if (_categoryRepository.EntityQuery().Any(c => c.Name.ToUpper() == model.Name.ToUpper().Trim() && c.Id != model.Id))
                     return new ErrorResult("Category with the same name exists!");
-                var entity = _categoryRepository.GetEntityQuery(c => c.Id == model.Id).SingleOrDefault();
+                var entity = _categoryRepository.EntityQuery(c => c.Id == model.Id).SingleOrDefault();
                 entity.Description = model.Description?.Trim();
                 entity.Name = model.Name.Trim();
                 _categoryRepository.Update(entity);

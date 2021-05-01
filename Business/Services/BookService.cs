@@ -23,7 +23,7 @@ namespace Business.Services
         {
             try
             {
-                if (_bookRepository.GetEntityQuery().Any(p => p.Name.ToUpper() == model.Name.ToUpper().Trim()))
+                if (_bookRepository.EntityQuery().Any(p => p.Name.ToUpper() == model.Name.ToUpper().Trim()))
                     return new ErrorResult("Product with the same name exists!");
 
                 double unitPrice;
@@ -52,7 +52,7 @@ namespace Business.Services
         {
             try
             {
-                _bookRepository.Delete(id);
+                _bookRepository.DeleteEntity(id);
                 return new SuccessResult();
             }
             catch (Exception exc)
@@ -69,7 +69,7 @@ namespace Business.Services
         public IQueryable<BookModel> GetQuery()
         {
            
-                var query = _bookRepository.GetEntityQuery("Category").OrderBy(p => p.Name).Select(p => new BookModel()
+                var query = _bookRepository.EntityQuery("Category").OrderBy(p => p.Name).Select(p => new BookModel()
                 {
                     Id = p.Id,
                     Guid = p.Guid,
@@ -96,7 +96,7 @@ namespace Business.Services
 
             try
             {
-                if (_bookRepository.GetEntityQuery().Any(p => p.Name.ToUpper() == model.Name.ToUpper().Trim() && p.Id != model.Id))
+                if (_bookRepository.EntityQuery().Any(p => p.Name.ToUpper() == model.Name.ToUpper().Trim() && p.Id != model.Id))
                     return new ErrorResult("Product with the same name exists!");
 
                 double unitPrice;
@@ -104,7 +104,7 @@ namespace Business.Services
                     return new ErrorResult("Unit price must be a decimal number!");
 
                 model.UnitPrice = unitPrice;
-                var entity = _bookRepository.GetEntityQuery(p => p.Id == model.Id).SingleOrDefault();
+                var entity = _bookRepository.EntityQuery(p => p.Id == model.Id).SingleOrDefault();
                 entity.CategoryId = model.CategoryId;
                 entity.Description = model.Description?.Trim();
                 entity.Name = model.Name.Trim();

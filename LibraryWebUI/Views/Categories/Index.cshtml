@@ -42,7 +42,7 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductCount)
+                @Html.DisplayNameFor(model => model.BookCount)
             </th>
             <th></th>
         </tr>
@@ -58,7 +58,7 @@
         @Html.DisplayFor(modelItem => item.Description)
     </td>
     <td>
-        @Html.DisplayFor(modelItem => item.ProductCount)
+        @Html.DisplayFor(modelItem => item.BookCount)
     </td>
     <td>
         <a asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-lg fa-pen-square"></i> Edit</a>

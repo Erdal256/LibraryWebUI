@@ -14,7 +14,7 @@ namespace Business.Models
         [StringLength(400, ErrorMessage = "{0} must be maximum {1} characters!")]
         public string Description { get; set; }
 
-        [DisplayName("Product Count")]
-        public int ProductCount { get; set; }
+        [DisplayName("Book Count")]
+        public int BookCount { get; set; }
     }
 }
