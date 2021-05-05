@@ -8,6 +8,11 @@ namespace DataAccess.EntityFramework.Contexts
     {
         public DbSet<Book> Books { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<City> Cities { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserDetail> UserDetails { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -17,11 +22,54 @@ namespace DataAccess.EntityFramework.Contexts
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Category>()
-                .HasMany(category => category.Books)
-                .WithOne(Book => Book.Category)
+            //modelBuilder.Entity<Category>()
+            //    .HasMany(category => category.Books)
+            //    .WithOne(Book => Book.Category)
+            //    .HasForeignKey(book => book.CategoryId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Book>()
+                .HasOne(book => book.Category)
+                .WithMany(category => category.Books)
                 .HasForeignKey(book => book.CategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<City>()
+                .HasOne(city => city.Country)
+                .WithMany(country => country.Cities)
+                .HasForeignKey(city => city.CountryId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+               .HasOne(user => user.Role)
+               .WithMany(role => role.Users)
+               .HasForeignKey(user => user.RoleId)
+               .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserDetail>()
+                .HasOne(userDetail => userDetail.Country)
+                .WithMany(country => country.UserDetails)
+                .HasForeignKey(userDetail => userDetail.CountryId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserDetail>()
+                .HasOne(userDetail => userDetail.City)
+                .WithMany(city => city.UserDetails)
+                .HasForeignKey(userDetail => userDetail.CityId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+                .HasOne(user => user.UserDetail)
+                .WithOne(userDetail => userDetail.User)
+                .HasForeignKey<User>(user => user.UserDetailId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserDetail>()
+                .HasIndex(userDetail => userDetail.EMail)
+                .IsUnique();
+
+            modelBuilder.Entity<Book>()
+                .HasIndex(book => book.Name);
         }
     }
 }
