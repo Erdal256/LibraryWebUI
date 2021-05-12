@@ -39,8 +39,7 @@ namespace Business.Services
         {
             throw new NotImplementedException();
         }
-
-        public IQueryable<CountryModel> GetQuery()
+        public IQueryable<CountryModel> Query()
         {
             throw new NotImplementedException();
         }

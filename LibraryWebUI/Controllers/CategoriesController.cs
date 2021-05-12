@@ -25,7 +25,7 @@ namespace LibraryWebUI.Controllers
         // GET: Categories
         public IActionResult Index()
         {
-            var query = _categoryService.GetQuery();
+            var query = _categoryService.Query();
             var model = query.ToList();
             return View(model);
         }
@@ -102,7 +102,7 @@ namespace LibraryWebUI.Controllers
             {
                 return View("NotFound");
             }
-            var query = _categoryService.GetQuery();
+            var query = _categoryService.Query();
 
             var category = query.SingleOrDefault(c => c.Id == id.Value);
             if (category == null)
@@ -150,7 +150,7 @@ namespace LibraryWebUI.Controllers
             if (deleteResult.Status == ResultStatus.Error)
             {
                 ModelState.AddModelError("", deleteResult.Message);
-                var categoryQuery = _categoryService.GetQuery();
+                var categoryQuery = _categoryService.Query();
 
                 var category = categoryQuery.SingleOrDefault(c => c.Id == id);
                 return View("Edit", category);

@@ -9,14 +9,17 @@ namespace Core.DataAccess.EntityFramework.Bases
     public abstract class RepositoryBase<TEntity> : IDisposable where TEntity : RecordBase, new()
     {
         private readonly DbContext _db;
+
         protected RepositoryBase(DbContext db)
         {
             _db = db;
         }
+
         public IQueryable<TEntity> Query()
         {
             return _db.Set<TEntity>().AsQueryable();
         }
+
         public virtual IQueryable<TEntity> EntityQuery(params string[] entitiesToInclude)
         {
             var query = Query();
@@ -26,11 +29,13 @@ namespace Core.DataAccess.EntityFramework.Bases
             }
             return query;
         }
+
         public virtual IQueryable<TEntity> EntityQuery(Expression<Func<TEntity, bool>> predicate, params string[] entitiesToInclude)
         {
             var query = EntityQuery(entitiesToInclude);
             return query.Where(predicate);
         }
+
         public void Add(TEntity entity, bool save = true)
         {
             try

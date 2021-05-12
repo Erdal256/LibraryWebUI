@@ -7,49 +7,44 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework.Contexts;
 using Entities.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Business.Services;
+using Core.Business.Models.Results;
+using Business.Models;
 
 namespace LibraryWebUI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CitiesController : Controller
     {
-        private readonly LibraryContext _context;
+        private readonly ICityService _cityService;
+        private readonly ICountryService _countryService;
+        //private readonly LibraryContext _context;
 
-        public CitiesController(LibraryContext context)
+        public CitiesController(ICityService cityService, ICountryService countryService)
         {
-            _context = context;
+            _cityService = cityService;
+            _countryService = countryService;
         }
 
         // GET: Cities
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var libraryContext = _context.Cities.Include(c => c.Country);
-            return View(await libraryContext.ToListAsync());
-        }
-
-        // GET: Cities/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var city = await _context.Cities
-                .Include(c => c.Country)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (city == null)
-            {
-                return NotFound();
-            }
-
-            return View(city);
+            var result = _cityService.GetCities();
+            if (result.Status == ResultStatus.Exception)
+                throw new Exception(result.Message);
+            return View(result.Data);
         }
 
         // GET: Cities/Create
         public IActionResult Create()
         {
-            ViewData["CountryId"] = new SelectList(_context.Countries, "Id", "Name");
-            return View();
+            var countriesResult = _countryService.GetCountries();
+            if (countriesResult.Status == ResultStatus.Exception)
+                throw new Exception(countriesResult.Message);
+            ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name");
+            var model = new CityModel();
+            return View(model);
         }
 
         // POST: Cities/Create
@@ -57,33 +52,54 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,CountryId,Id,Guid")] City city)
+        public IActionResult Create(CityModel city)
         {
+            Result<List<CountryModel>> countriesResult;
             if (ModelState.IsValid)
             {
-                _context.Add(city);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var result = _cityService.Add(city);
+                if (result.Status == ResultStatus.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                if (result.Status == ResultStatus.Error)
+                {
+                    ModelState.AddModelError("", result.Message);
+                    countriesResult = _countryService.GetCountries();
+                    if (countriesResult.Status == ResultStatus.Exception)
+                        throw new Exception(countriesResult.Message);
+                    ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", city.CountryId);
+                    return View(city);
+                }
+                throw new Exception(result.Message);
             }
-            ViewData["CountryId"] = new SelectList(_context.Countries, "Id", "Name", city.CountryId);
+            countriesResult = _countryService.GetCountries();
+            if (countriesResult.Status == ResultStatus.Exception)
+                throw new Exception(countriesResult.Message);
+            ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", city.CountryId);
             return View(city);
         }
 
         // GET: Cities/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
-            var city = await _context.Cities.FindAsync(id);
-            if (city == null)
-            {
-                return NotFound();
-            }
-            ViewData["CountryId"] = new SelectList(_context.Countries, "Id", "Name", city.CountryId);
-            return View(city);
+            var result = _cityService.GetCity(id.Value);
+
+            if (result.Status == ResultStatus.Exception)
+                throw new Exception(result.Message);
+            if (result.Status == ResultStatus.Error)
+                return View("NotFound");
+
+            var countriesResult = _countryService.GetCountries();
+            if (countriesResult.Status == ResultStatus.Exception)
+                throw new Exception(countriesResult.Message);
+            ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", result.Data.CountryId);
+            return View(result.Data);
         }
 
         // POST: Cities/Edit/5
@@ -91,70 +107,64 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,CountryId,Id,Guid")] City city)
+        public IActionResult Edit(CityModel city)
         {
-            if (id != city.Id)
-            {
-                return NotFound();
-            }
-
+            Result<List<CountryModel>> countriesResult;
             if (ModelState.IsValid)
             {
-                try
+                var result = _cityService.Update(city);
+                if (result.Status == ResultStatus.Success)
                 {
-                    _context.Update(city);
-                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (result.Status == ResultStatus.Error)
                 {
-                    if (!CityExists(city.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", result.Message);
+                    countriesResult = _countryService.GetCountries();
+                    if (countriesResult.Status == ResultStatus.Exception)
+                        throw new Exception(countriesResult.Message);
+                    ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", city.CountryId);
+                    return View(city);
                 }
-                return RedirectToAction(nameof(Index));
+
+                throw new Exception(result.Message);
             }
-            ViewData["CountryId"] = new SelectList(_context.Countries, "Id", "Name", city.CountryId);
+
+            countriesResult = _countryService.GetCountries();
+            if (countriesResult.Status == ResultStatus.Exception)
+                throw new Exception(countriesResult.Message);
+            ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", city.CountryId);
             return View(city);
         }
 
         // GET: Cities/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int id)
         {
-            if (id == null)
+            var deleteResult = _cityService.Delete(id);
+            if (deleteResult.Status == ResultStatus.Success)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
 
-            var city = await _context.Cities
-                .Include(c => c.Country)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (city == null)
+            if (deleteResult.Status == ResultStatus.Error)
             {
-                return NotFound();
+                ModelState.AddModelError("", deleteResult.Message);
+
+                var getResult = _cityService.GetCity(id);
+                if (getResult.Status == ResultStatus.Exception)
+                    throw new Exception(getResult.Message);
+                if (getResult.Status == ResultStatus.Error)
+                    return View("NotFound");
+
+                var countriesResult = _countryService.GetCountries();
+                if (countriesResult.Status == ResultStatus.Exception)
+                    throw new Exception(countriesResult.Message);
+                ViewBag.Countries = new SelectList(countriesResult.Data, "Id", "Name", getResult.Data.CountryId);
+                return View("Edit", getResult.Data);
             }
-
-            return View(city);
+            throw new Exception(deleteResult.Message);
         }
 
-        // POST: Cities/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var city = await _context.Cities.FindAsync(id);
-            _context.Cities.Remove(city);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool CityExists(int id)
-        {
-            return _context.Cities.Any(e => e.Id == id);
-        }
     }
 }

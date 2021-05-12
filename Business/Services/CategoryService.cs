@@ -64,20 +64,17 @@ namespace Business.Services
         {
             _categoryRepository?.Dispose();
         }
-
-        public IQueryable<CategoryModel> GetQuery()
+        public IQueryable<CategoryModel> Query()
         {
-            
-                var query = _categoryRepository.EntityQuery("Books").OrderBy(c => c.Name).Select(c => new CategoryModel()
-                {
-                    Id = c.Id,
-                    Guid = c.Guid,
-                    Name = c.Name,
-                    Description = c.Description,
-                    BookCount =c.Books.Count,
-                });
-                return query;
-            
+            var query = _categoryRepository.EntityQuery("Books").OrderBy(c => c.Name).Select(c => new CategoryModel()
+            {
+                Id = c.Id,
+                Guid = c.Guid,
+                Name = c.Name,
+                Description = c.Description,
+                BookCount = c.Books.Count,
+            });
+            return query;
         }
 
         public Result Update(CategoryModel model)

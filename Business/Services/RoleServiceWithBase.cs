@@ -29,7 +29,7 @@ namespace Business.Services
             throw new NotImplementedException();
         }
 
-        public IQueryable<RoleModel> GetQuery()
+        public IQueryable<RoleModel> Query()
         {
             throw new NotImplementedException();
         }

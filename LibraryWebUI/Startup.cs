@@ -39,8 +39,17 @@ namespace LibraryWebUI
             services.AddScoped<DbContext, LibraryContext>();
             services.AddScoped<BookRepositoryBase, BookRepository>();
             services.AddScoped<CategoryRepositoryBase, CategoryRepository>();
+            services.AddScoped<UserRepositoryBase, UserRepository>();
+            services.AddScoped<CountryRepositoryBase, CountryRepository>();
+            services.AddScoped<CityRepositoryBase, CityRepository>();
+            services.AddScoped<RoleRepositoryBase, RoleRepository>();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<ICityService, ICityService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IAccountService, AccountService>();
             #endregion
         }
 

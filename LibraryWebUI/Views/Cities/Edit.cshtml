@@ -1,41 +1,32 @@
-﻿@model Entities.Entities.City
+﻿@model CityModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit City";
 }
 
-<h1>Edit</h1>
+<h1>@ViewBag.Title</h1>
 
-<h4>City</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CountryId" class="control-label"></label>
-                <select asp-for="CountryId" class="form-control" asp-items="ViewBag.CountryId"></select>
-                <span asp-validation-for="CountryId" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Guid" class="control-label"></label>
-                <input asp-for="Guid" class="form-control" />
-                <span asp-validation-for="Guid" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+<partial name="_CreateEdit" model="Model" />
+
+<form id="deleteCityForm" asp-action="Delete" method="post">
+    <input asp-for="Id" type="hidden" />
+</form>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <button id="deleteCityButton" class="btn btn-danger">Delete</button>
+    <br />
+    <br />
+    <a asp-action="Index">Back to City List</a>
 </div>
+
+@section Scripts
+{
+    <script>
+        $(function() {
+            $("#deleteCityButton").click(function () {
+                $("#deleteCityForm").submit();
+            });
+        });
+    </script>
+}
 

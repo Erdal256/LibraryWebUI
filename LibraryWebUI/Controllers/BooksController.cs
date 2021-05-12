@@ -19,7 +19,7 @@ namespace LibraryWebUI.Controllers
         }
         public IActionResult Index()
         {
-            var query = _bookService.GetQuery();
+            var query = _bookService.Query();
             var model = query.ToList();
             return View(model);
 
@@ -32,7 +32,7 @@ namespace LibraryWebUI.Controllers
                 return View("NotFound");
             }
 
-            var query = _bookService.GetQuery();
+            var query = _bookService.Query();
 
             var model = query.SingleOrDefault(p => p.Id == id.Value);
 
@@ -46,7 +46,7 @@ namespace LibraryWebUI.Controllers
 
         public IActionResult Create()
         {
-            var query = _categoryService.GetQuery();
+            var query = _categoryService.Query();
             ViewBag.Categories = new SelectList(query.ToList(), "Id", "Name");
             return View();
         }
@@ -77,13 +77,13 @@ namespace LibraryWebUI.Controllers
                 //ViewBag.Message = productResult.Message;
                 ModelState.AddModelError("", bookResult.Message);
 
-                categoryQuery = _categoryService.GetQuery();
+                categoryQuery = _categoryService.Query();
                 ViewBag.Categories = new SelectList(categoryQuery.ToList(), "Id", "Name", book.CategoryId);
                 return View(book);
             }
 
             // validation error
-            categoryQuery = _categoryService.GetQuery();
+            categoryQuery = _categoryService.Query();
             ViewBag.Categories = new SelectList(categoryQuery.ToList(), "Id", "Name", book.CategoryId);
             return View(book);
         }
@@ -92,12 +92,12 @@ namespace LibraryWebUI.Controllers
             if (id == null)
                 return NotFound();
 
-            var bookQuery = _bookService.GetQuery();
+            var bookQuery = _bookService.Query();
             var book = bookQuery.SingleOrDefault(p => p.Id == id.Value);
             if (book == null)
                 return View("NotFound");
 
-            var categoryQuery = _categoryService.GetQuery();
+            var categoryQuery = _categoryService.Query();
             ViewBag.Categories = new SelectList(categoryQuery.ToList(), "Id", "Name", book.CategoryId);
 
             return View(book);
@@ -125,11 +125,11 @@ namespace LibraryWebUI.Controllers
                 }
                 ModelState.AddModelError("", bookResult.Message);
 
-                categoryQuery = _categoryService.GetQuery();
+                categoryQuery = _categoryService.Query();
                 ViewBag.Categories = new SelectList(categoryQuery.ToList(), "Id", "Name", book.CategoryId);
                 return View(book);
             }
-            categoryQuery = _categoryService.GetQuery();
+            categoryQuery = _categoryService.Query();
             ViewBag.Categories = new SelectList(categoryQuery.ToList(), "Id", "Name", book.CategoryId);
             return View(book);
 

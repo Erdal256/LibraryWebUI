@@ -66,29 +66,27 @@ namespace Business.Services
             _bookRepository.Dispose();
         }
 
-        public IQueryable<BookModel> GetQuery()
+        public IQueryable<BookModel> Query()
         {
-           
-                var query = _bookRepository.EntityQuery("Category").OrderBy(p => p.Name).Select(p => new BookModel()
+            var query = _bookRepository.EntityQuery("Category").OrderBy(p => p.Name).Select(p => new BookModel()
+            {
+                Id = p.Id,
+                Guid = p.Guid,
+                Name = p.Name,
+                Description = p.Description,
+                UnitPrice = p.UnitPrice,
+                UnitPriceText = p.UnitPrice.ToString(new CultureInfo("en")),
+                StockAmount = p.StockAmount,
+                CategoryId = p.CategoryId,
+                Category = new CategoryModel()
                 {
                     Id = p.Id,
                     Guid = p.Guid,
-                    Name =p.Name,
-                    Description =p.Description,
-                    UnitPrice = p.UnitPrice,
-                    UnitPriceText = p.UnitPrice.ToString(new CultureInfo("en")),
-                    StockAmount = p.StockAmount,
-                    CategoryId =p.CategoryId,
-                    Category = new CategoryModel()
-                    {
-                        Id = p.Id,
-                        Guid =p.Guid,
-                        Name = p.Name,
-                        Description =p.Category.Description
-                    }
-                });
-                return query;
-           
+                    Name = p.Name,
+                    Description = p.Category.Description
+                }
+            });
+            return query;
         }
 
         public Result Update(BookModel model)
