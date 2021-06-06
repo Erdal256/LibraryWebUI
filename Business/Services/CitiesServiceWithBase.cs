@@ -64,7 +64,24 @@ namespace Business.Services
 
         public void Dispose()
         {
-             _cityRepository?.Dispose();
+            _cityRepository?.Dispose();
+        }
+
+        public IQueryable<CityModel> Query()
+        {
+            return _cityRepository.EntityQuery("Country").OrderBy(c => c.Name).Select(c => new CityModel()
+            {
+                Id = c.Id,
+                Guid = c.Guid,
+                Name = c.Name,
+                CountryId = c.CountryId,
+                Country = new CountryModel()
+                {
+                    Id = c.Country.Id,
+                    Guid = c.Country.Guid,
+                    Name = c.Country.Name
+                }
+            });
         }
 
         public Result<List<CityModel>> GetCities(int? countryId = null)
@@ -82,20 +99,6 @@ namespace Business.Services
             }
         }
 
-        public Result<CityModel> GetCity(int id)
-        {
-            try
-            {
-                var city = Query().SingleOrDefault(c => c.Id == id);
-                if (city == null)
-                    return new ErrorResult<CityModel>("City not found!");
-                return new SuccessResult<CityModel>(city);
-            }
-            catch (Exception exc)
-            {
-                return new ExceptionResult<CityModel>(exc);
-            }
-        }
         public Result Update(CityModel model)
         {
             try
@@ -116,21 +119,20 @@ namespace Business.Services
                 return new ExceptionResult(exc);
             }
         }
-        public IQueryable<CityModel> Query()
+
+        public Result<CityModel> GetCity(int id)
         {
-            return _cityRepository.EntityQuery("Country").OrderBy(c => c.Name).Select(c => new CityModel()
+            try
             {
-                Id = c.Id,
-                Guid = c.Guid,
-                Name = c.Name,
-                CountryId = c.CountryId,
-                Country = new CountryModel()
-                {
-                    Id = c.Country.Id,
-                    Guid = c.Country.Guid,
-                    Name = c.Country.Name
-                }
-            });
+                var city = Query().SingleOrDefault(c => c.Id == id);
+                if (city == null)
+                    return new ErrorResult<CityModel>("City not found!");
+                return new SuccessResult<CityModel>(city);
+            }
+            catch (Exception exc)
+            {
+                return new ExceptionResult<CityModel>(exc);
+            }
         }
     }
 }

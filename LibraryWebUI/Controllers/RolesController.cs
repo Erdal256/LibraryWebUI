@@ -7,76 +7,97 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework.Contexts;
 using Entities.Entities;
+using Business.Services;
+using Core.Business.Models.Results;
+using Business.Models;
 
 namespace LibraryWebUI.Controllers
 {
     public class RolesController : Controller
     {
-        private readonly LibraryContext _context;
+        private readonly IRoleService _roleService;
 
-        public RolesController(LibraryContext context)
+        public RolesController(IRoleService roleService)
         {
-            _context = context;
+            _roleService = roleService;
         }
 
+
         // GET: Roles
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Roles.ToListAsync());
+            var query = _roleService.Query();
+            var model = query.ToList();
+            return View(model);
         }
 
         // GET: Roles/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
-            var role = await _context.Roles
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var query = _roleService.Query();
+
+            var role = query.SingleOrDefault(r => r.Id == id.Value);
+
             if (role == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
-
             return View(role);
         }
 
         // GET: Roles/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new RoleModel();
+            return View(model);
         }
+
 
         // POST: Roles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Id,Guid")] Role role)
+        public IActionResult Create(RoleModel role)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(role);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var result = _roleService.Add(role);
+                if (result.Status == ResultStatus.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                if (result.Status == ResultStatus.Error)
+                {
+                    ModelState.AddModelError("", result.Message);
+                    return View(role);
+                }
+                throw new Exception(result.Message);
             }
             return View(role);
         }
 
         // GET: Roles/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
-            var role = await _context.Roles.FindAsync(id);
+            var query = _roleService.Query();
+
+            var role = query.SingleOrDefault(r => r.Id == id.Value);
+
             if (role == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
             return View(role);
         }
@@ -86,68 +107,34 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Id,Guid")] Role role)
+        public IActionResult Edit(RoleModel role)
         {
-            if (id != role.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                var result = _roleService.Update(role);
+                if (result.Status == ResultStatus.Success)
                 {
-                    _context.Update(role);
-                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (result.Status == ResultStatus.Error)
                 {
-                    if (!RoleExists(role.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", result.Message);
+                    return View(role);
                 }
-                return RedirectToAction(nameof(Index));
+
+                throw new Exception(result.Message);
             }
             return View(role);
         }
-
         // GET: Roles/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        public JsonResult Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var role = await _context.Roles
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (role == null)
-            {
-                return NotFound();
-            }
-
-            return View(role);
-        }
-
-        // POST: Roles/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var role = await _context.Roles.FindAsync(id);
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool RoleExists(int id)
-        {
-            return _context.Roles.Any(e => e.Id == id);
+            var deleteResult = _roleService.Delete(id);
+            if (deleteResult.Status == ResultStatus.Exception)
+                deleteResult.Message = "An exception occured while deleting the role!";
+            return Json(deleteResult.Message);
         }
     }
 }

@@ -7,46 +7,54 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework.Contexts;
 using Entities.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Business.Services;
+using Core.Business.Models.Results;
+using Business.Models;
 
 namespace LibraryWebUI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CountriesController : Controller
     {
-        private readonly LibraryContext _context;
+        private readonly ICountryService _countryService;
 
-        public CountriesController(LibraryContext context)
+        public CountriesController(ICountryService countryService)
         {
-            _context = context;
+            _countryService = countryService;
         }
-
         // GET: Countries
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Countries.ToListAsync());
+            var result = _countryService.GetCountries();
+            if (result.Status == ResultStatus.Exception)
+                throw new Exception(result.Message);
+            return View(result.Data);
         }
 
         // GET: Countries/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var country = await _context.Countries
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (country == null)
-            {
-                return NotFound();
-            }
+        //    var country = await _context.Countries
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (country == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(country);
-        }
+        //    return View(country);
+        //}
 
         // GET: Countries/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new CountryModel();
+            return View(model);
         }
 
         // POST: Countries/Create
@@ -54,31 +62,40 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Id,Guid")] Country country)
+        public IActionResult Create(CountryModel country)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(country);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var result = _countryService.Add(country);
+                if (result.Status == ResultStatus.Success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                if (result.Status == ResultStatus.Error)
+                {
+                    ModelState.AddModelError("", result.Message);
+                    return View(country);
+                }
+                throw new Exception(result.Message);
             }
             return View(country);
         }
-
         // GET: Countries/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
-            var country = await _context.Countries.FindAsync(id);
-            if (country == null)
-            {
-                return NotFound();
-            }
-            return View(country);
+            var result = _countryService.GetCountry(id.Value);
+
+            if (result.Status == ResultStatus.Exception)
+                throw new Exception(result.Message);
+            if (result.Status == ResultStatus.Error)
+                return View("NotFound");
+
+            return View(result.Data);
         }
 
         // POST: Countries/Edit/5
@@ -86,68 +103,51 @@ namespace LibraryWebUI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Id,Guid")] Country country)
+        public IActionResult Edit(CountryModel country)
         {
-            if (id != country.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                var result = _countryService.Update(country);
+                if (result.Status == ResultStatus.Success)
                 {
-                    _context.Update(country);
-                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (result.Status == ResultStatus.Error)
                 {
-                    if (!CountryExists(country.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", result.Message);
+                    return View(country);
                 }
+
+                throw new Exception(result.Message);
+            }
+            return View(country);
+        }
+
+
+        // POST: Countries/Delete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            var deleteResult = _countryService.Delete(id);
+            if (deleteResult.Status == ResultStatus.Success)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            return View(country);
-        }
 
-        // GET: Countries/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+            if (deleteResult.Status == ResultStatus.Error)
             {
-                return NotFound();
+                ModelState.AddModelError("", deleteResult.Message);
+
+                var getResult = _countryService.GetCountry(id);
+                if (getResult.Status == ResultStatus.Exception)
+                    throw new Exception(getResult.Message);
+                if (getResult.Status == ResultStatus.Error)
+                    return View("NotFound");
+                return View("Edit", getResult.Data);
             }
-
-            var country = await _context.Countries
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (country == null)
-            {
-                return NotFound();
-            }
-
-            return View(country);
-        }
-
-        // POST: Countries/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var country = await _context.Countries.FindAsync(id);
-            _context.Countries.Remove(country);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool CountryExists(int id)
-        {
-            return _context.Countries.Any(e => e.Id == id);
+            throw new Exception(deleteResult.Message);
         }
     }
 }

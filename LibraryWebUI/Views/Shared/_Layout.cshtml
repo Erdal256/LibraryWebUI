@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E-Trade | @ViewData["Title"]</title>
+    <title>Librray | @ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" />
@@ -13,19 +13,41 @@
     <div class="wrapper">
         <nav id="sidebar">
             <div class="sidebar-header div-header">
-                <h3>Library</h3>
+                <a class="a-navbar" asp-action="Index" asp-controller="Home"><h5><i class="fas fa-shopping-basket"></i> Library</h5></a>
             </div>
             <ul class="list-unstyled components">
                 <li class="nav-item">
-                    <a class="a-sidebar" asp-action="Index" asp-controller="Books"><i class="fas fa-clipboard-list"></i> Book</a>
-                </li>
-                <li class="nav-item">
-                    <a class="a-sidebar" asp-action="Index" asp-controller="Categories"><i class="fas fa-clipboard-list"></i> Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="a-sidebar" asp-action="Index" asp-controller="Categories"><i class="fas fa-clipboard-list"></i> Contact</a> @*iletişim*@
+                    @*<a class="a-sidebar" asp-action="Index" asp-controller="Products"><i class="fas fa-clipboard-list"></i> Products</a>*@
+                    <a href="/Books/Index" class="a-sidebar"><i class="fas fa-clipboard-list"></i> Books</a>
                 </li>
             </ul>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                <ul class="list-unstyled admin">
+                    <p>Domains</p>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="Categories"><i class="fas fa-bars"></i> Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="Countries"><i class="fas fa-bars"></i> Countries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="Cities"><i class="fas fa-bars"></i> Cities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="Users"><i class="fas fa-bars"></i> Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="Roles"><i class="fas fa-bars"></i> Roles</a>
+                    </li>
+                </ul>
+                @*<ul class="list-unstyled admin">
+                    <p>Reports</p>
+                    <li class="nav-item">
+                        <a class="a-sidebar" asp-action="Index" asp-controller="BooksReportAjax"><i class="fas fa-archive"></i> Products Report</a>
+                    </li>
+                </ul>*@ // bu kısımada  contoroller,models ve views kısmında  BooksReportAjax olarak bakılacak
+            }
         </nav>
         <div id="content">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -41,12 +63,26 @@
                     </ul>
                     <div class="navbar-text">
                         <ul class="navbar-nav mr-auto">
-                            <li class="nav-item">
-                                <a class="a-navbar" asp-action="Register" asp-controller="Account"><i class="far fa-save"></i> Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="a-navbar" asp-action="Login" asp-controller="Accounts"><i class="fas fa-sign-in-alt"></i> Login</a>
-                            </li>
+                            @if (!User.Identity.IsAuthenticated)
+                            {
+                                <li class="nav-item">
+                                    <a class="a-navbar" asp-action="Register" asp-controller="Accounts"><i class="far fa-save"></i> Register</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="a-navbar" asp-action="Login" asp-controller="Accounts"><i class="fas fa-sign-in-alt"></i> Login</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <div class="div-navbar">
+                                        <span class="s-navbar"><i class="fas fa-user"></i> @User.Identity.Name</span>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="a-navbar" asp-action="Logout" asp-controller="Accounts"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                </li>
+                            }
                         </ul>
                     </div>
                 </div>

@@ -16,12 +16,14 @@ namespace LibraryWebUI.Controllers
         private readonly IAccountService _accountService;
         private readonly ICountryService _countryService;
         private readonly ICityService _cityService;
+
         public AccountsController(IAccountService accountService, ICountryService countryService, ICityService cityService)
         {
             _accountService = accountService;
             _countryService = countryService;
             _cityService = cityService;
         }
+
         public IActionResult Register()
         {
             var countriesResult = _countryService.GetCountries();
@@ -31,6 +33,7 @@ namespace LibraryWebUI.Controllers
             var model = new UserRegisterModel();
             return View(model);
         }
+
         [HttpPost]
         public IActionResult Register(UserRegisterModel model)
         {

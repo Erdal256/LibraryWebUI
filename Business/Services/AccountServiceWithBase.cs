@@ -2,8 +2,6 @@
 using Business.Models;
 using Core.Business.Models.Results;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Business.Services
 {
@@ -15,10 +13,12 @@ namespace Business.Services
     public class AccountService : IAccountService
     {
         private readonly IUserService _userService;
-        public AccountService(UserService userService)
+
+        public AccountService(IUserService userService)
         {
             _userService = userService;
         }
+
         public Result<UserModel> Login(UserLoginModel model)
         {
             try
@@ -53,7 +53,6 @@ namespace Business.Services
             }
             catch (Exception exc)
             {
-
                 return new ExceptionResult(exc);
             }
         }

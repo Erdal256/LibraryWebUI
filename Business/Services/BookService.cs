@@ -14,9 +14,12 @@ namespace Business.Services
     public class BookService : IBookService
     {
         private readonly BookRepositoryBase _bookRepository;
-        public BookService(BookRepositoryBase bookRepository)
+        private readonly CategoryRepositoryBase _categoryRepository;
+
+        public BookService(BookRepositoryBase bookRepository, CategoryRepositoryBase categoryRepository)
         {
             _bookRepository = bookRepository;
+            _categoryRepository = categoryRepository;
         }
            
         public Result Add(BookModel model)
@@ -116,5 +119,6 @@ namespace Business.Services
                 return new ExceptionResult(exc);
             }
         }
+
     }
 }

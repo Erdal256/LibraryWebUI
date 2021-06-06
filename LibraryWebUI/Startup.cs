@@ -4,17 +4,14 @@ using Core.DataAccess.Configs;
 using DataAccess.EntityFramework.Contexts;
 using DataAccess.EntityFramework.Repositories;
 using DataAccess.EntityFramework.Repositories.Bases;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LibraryWebUI
 {
@@ -31,11 +28,25 @@ namespace LibraryWebUI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-           
+
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(config =>
+                {
+                    config.LoginPath = "/Accounts/Login";
+                    config.AccessDeniedPath = "/Accounts/AccessDenied";
+                    config.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    config.SlidingExpiration = true;
+                });
+
+            //services.AddSession();
+            services.AddSession(config =>
+            {
+                config.IdleTimeout = TimeSpan.FromMinutes(30); // default: 20 dakika
+            });
+
             #region
-
             ConnectionConfig.ConnectionString = Configuration.GetConnectionString("LibraryContext");
-
             services.AddScoped<DbContext, LibraryContext>();
             services.AddScoped<BookRepositoryBase, BookRepository>();
             services.AddScoped<CategoryRepositoryBase, CategoryRepository>();
@@ -47,7 +58,7 @@ namespace LibraryWebUI
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICountryService, CountryService>();
-            services.AddScoped<ICityService, ICityService>();
+            services.AddScoped<ICityService, CityService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IAccountService, AccountService>();
             #endregion
