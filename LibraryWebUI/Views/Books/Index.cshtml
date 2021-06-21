@@ -5,10 +5,17 @@
 }
 
 <h1>@ViewData["Title"]</h1>
+@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" asp-controller="Books"><i class="fas fa-plus"></i> Create New Book</a>
+    </p>
+}
+@if (ViewData["BooksMessage"] != null)
+{
+    <p class="bg-success text-white">@ViewData["BooksMessage"]</p>}
 
-<p>
-    <a asp-action="Create" asp-controller="Books"><i class="fas fa-plus"></i> Create New Book</a>
-</p>
+
 <table id="books" class="display" style="width: 100%;">
     <thead>
         <tr>
@@ -49,10 +56,38 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Category.Name)
                 </td>
+                @*<td>
+                        <a asp-action="Details" asp-route-id="@item.Id"><i class="fas fa-lg fa-info-circle"></i> Details</a> |
+                        <a asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-lg fa-pen-square"></i> Edit</a> |
+                        <a href="#" onclick="deleteBook(@item.Id);"><i class="fas fa-lg fa-trash"></i> Delete</a>
+                    </td>*@
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id"><i class="fas fa-lg fa-info-circle"></i> Details</a> |
-                    <a asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-lg fa-pen-square"></i> Edit</a> |
-                    <a href="#" onclick="deleteBook(@item.Id);"><i class="fas fa-lg fa-trash"></i> Delete</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {@if (User.IsInRole("User"))
+                        {
+                            <a asp-action="AddToCart" asp-controller="Cart" asp-route-productId="@item.Id"><i class="fas fa-cart-plus"></i> Add to Cart</a>
+                            @:&nbsp;|&nbsp;
+                            if (ViewBag.ProductId != null)
+                            {
+                                if (item.Id == Convert.ToInt32(ViewBag.ProductId))
+                                {
+                                    <a class="text-success" title="Last product added to cart"><i class="fas fa-check-square"></i></a>
+                                    @:&nbsp;|&nbsp;
+                                }
+                            }
+                        }
+
+
+                    <a asp-action="Details" asp-route-id="@item.Id"><i class="fas fa-lg fa-info-circle"></i> Details</a>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        @:&nbsp;|&nbsp;
+                        <a asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-lg fa-pen-square"></i> Edit</a>
+                        @:&nbsp;|&nbsp;
+                        <a href="#" onclick="deleteProduct(@item.Id);"><i class="fas fa-lg fa-trash"></i> Delete</a>
+                    }
+                }
                 </td>
             </tr>
         }

@@ -8,6 +8,9 @@ using System.Linq;
 using Entities.Entities;
 using System.Globalization;
 using System.Text;
+using Business.Models.Report;
+using Core.Business.Models.Paging;
+using Core.Business.Models.OrderModel;
 
 namespace Business.Services
 {
@@ -67,6 +70,11 @@ namespace Business.Services
         public void Dispose()
         {
             _bookRepository.Dispose();
+        }
+
+        public Result<List<BooksReportModel>> GetBookReport(PageModel page = null, OrderModel order = null)
+        {
+            throw new NotImplementedException();
         }
 
         public IQueryable<BookModel> Query()

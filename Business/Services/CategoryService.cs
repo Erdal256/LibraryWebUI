@@ -3,8 +3,11 @@ using Business.Services.Bases;
 using Core.Business.Models.Results;
 using DataAccess.EntityFramework.Repositories.Bases;
 using Entities.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Business.Services
 {
@@ -64,6 +67,25 @@ namespace Business.Services
         {
             _categoryRepository?.Dispose();
         }
+
+        public async Task<Result<List<CategoryModel>>> GetCategoriesAsync()
+        {
+            try
+            {
+                List<Category> categoryEntities = await _categoryRepository.Query().OrderBy(c => c.Name).ToListAsync();
+                List<CategoryModel> categories = categoryEntities.Select(c => new CategoryModel()
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                }).ToList();
+                return new SuccessResult<List<CategoryModel>>(categories);
+            }
+            catch (Exception exc)
+            {
+                return new ExceptionResult<List<CategoryModel>>(exc);
+            }
+        }
+
         public IQueryable<CategoryModel> Query()
         {
             var query = _categoryRepository.EntityQuery("Books").OrderBy(c => c.Name).Select(c => new CategoryModel()

@@ -9,7 +9,7 @@
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit" autocomplete="off">
+        <form asp-action="Edit" autocomplete="off"  enctype="multipart/form-data">
             <input asp-for="Id" type="hidden" />
             @Html.AntiForgeryToken()
             <div asp-validation-summary="All" class="text-danger"></div>

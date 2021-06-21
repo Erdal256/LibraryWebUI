@@ -32,7 +32,7 @@
                 <label asp-for="RoleId" class="col-1"></label>
                 <div class="col-11">
                     @{
-                        var roles = ViewBag.Roles as SelectList; @* Controller'da SelectList olarak oluşturmuştuk, bu yüzden SelectList kullandık *@
+                        var roles = ViewBag.Roles as SelectList; 
                         if (roles != null && roles.Count() > 0)
                         {
                             foreach (var role in roles)
