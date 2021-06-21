@@ -21,7 +21,7 @@
                     <a href="/Books/Index" class="a-sidebar"><i class="fas fa-clipboard-list"></i> Books</a>
                 </li>
             </ul>
-            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))  
             {
                 <ul class="list-unstyled admin">
                     <p>Domains</p>
