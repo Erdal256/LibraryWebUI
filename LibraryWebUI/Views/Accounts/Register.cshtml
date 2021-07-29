@@ -1,7 +1,7 @@
 ﻿@model UserRegisterModel
 
-@{
-    ViewData["Title"] = "Register";
+@{ 
+    ViewData["Title"] = "Register"; 
 }
 
 <h1>Register</h1>
@@ -46,12 +46,10 @@
                 <select asp-for="UserDetail.CityId" asp-items="ViewBag.Cities" class="form-control cities">
                     @if (ViewBag.Cities == null)
                     {
-                        <option value="">-- Select Country --</option>
-                    }
+        <option value="">-- Select Country --</option> }
                     else
                     {
-                        <option value="">-- Select City --</option>
-                    }
+        <option value="">-- Select City --</option>}
                 </select>
                 <span asp-validation-for="UserDetail.CityId" class="text-danger"></span>
             </div>
@@ -70,6 +68,9 @@
 @section Scripts
 {
     <script>
+        //$(document).ready(function() {
+
+        //});
         $(function () {
             $("#countries").change(function () {
                 $(".cities").empty();
@@ -79,11 +80,46 @@
                     $("#countriesMessage").text("Please select a country...");
                     $(".cities").append('<option value="">-- Select Country --</option>');
                 } else {
+
+                    //$.ajax({
+                    //    cache: false,
+
+                    //    // ASP.NET Core web uygulamalarında problem çıkarır, .NET Framework web uygulamalarında kullanılabilir.
+                    //    //contentType: "application/json;charset=utf-8;",
+
+                    //    dataType: "json",
+
+                    //    // GET isteği 1. yöntem:
+                    //    //url: "/CitiesJson/CitiesGet/" + selectedCountryId,
+                    //    //type: "get",
+
+                    //    // GET isteği 2. yöntem:
+                    //    //url: "/CitiesJson/CitiesGet",
+                    //    //type: "get",
+                    //    //data: { countryId: selectedCountryId },
+
+                    //    // POST isteği:
+                    //    url: "/CitiesJson/CitiesPost",
+                    //    type: "post",
+                    //    data: { countryId: selectedCountryId },
+
+                    //    success: function(cities) {
+                    //        $(".cities").append('<option value="">-- Select City --</option>');
+                    //        for (var i = 0; i < cities.length; i++) {
+                    //            $(".cities").append('<option value="' + cities[i].id + '">' + cities[i].name + '</option>');
+                    //        }
+                    //    },
+                    //    error: function() {
+                    //        alert("An error occured during AJAX request!");
+                    //    }
+                    //});
                     $.getJSON(
-                        "/CitiesJson/CitiesGet", 
+                        //"/CitiesJson/CitiesGet/" + selectedCountryId, // GET isteği 1. yöntem
+
+                        "/CitiesJson/CitiesGet", // GET isteği 2. yöntem
                         { countryId: selectedCountryId },
 
-                        function(cities) {
+                        function (cities) {
                             $(".cities").append('<option value="">-- Select City --</option>');
                             for (var i = 0; i < cities.length; i++) {
                                 $(".cities").append('<option value="' + cities[i].id + '">' + cities[i].name + '</option>');

@@ -1,8 +1,6 @@
 ﻿@model UserLoginModel
 
-@{
-    ViewData["Title"] = "Login";
-}
+@{ ViewData["Title"] = "Login"; }
 
 <h1>Login</h1>
 
@@ -15,7 +13,7 @@
             <div asp-validation-summary="All" class="text-danger"></div>
             @if (ViewBag.Message != null)
             {
-                <p class="bg-danger text-white">@ViewBag.Message</p>
+             <p class="bg-danger text-white">@ViewBag.Message</p>
             }
             <div class="form-group">
                 <label asp-for="UserName"></label>

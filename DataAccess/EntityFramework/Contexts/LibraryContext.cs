@@ -29,24 +29,28 @@ namespace DataAccess.EntityFramework.Contexts
             //    .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Book>()
+                .ToTable("LibraryBooks")
                 .HasOne(book => book.Category)
                 .WithMany(category => category.Books)
                 .HasForeignKey(book => book.CategoryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<City>()
+                .ToTable("LibraryCities")
                 .HasOne(city => city.Country)
                 .WithMany(country => country.Cities)
                 .HasForeignKey(city => city.CountryId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<User>()
+               .ToTable("LibraryUsers")
                .HasOne(user => user.Role)
                .WithMany(role => role.Users)
                .HasForeignKey(user => user.RoleId)
                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserDetail>()
+                 .ToTable("LibraryUserDetails")
                 .HasOne(userDetail => userDetail.Country)
                 .WithMany(country => country.UserDetails)
                 .HasForeignKey(userDetail => userDetail.CountryId)
@@ -70,6 +74,17 @@ namespace DataAccess.EntityFramework.Contexts
 
             modelBuilder.Entity<Book>()
                 .HasIndex(book => book.Name);
+            modelBuilder.Entity<Category>()
+                .ToTable("LibraryCategories");
+
+            modelBuilder.Entity<Country>()
+                .ToTable("LibraryCountries");
+
+            modelBuilder.Entity<Role>()
+                .ToTable("LibraryRoles");
+
+            modelBuilder.Entity<Role>()
+                .ToTable("LibraryRoles");
         }
     }
 }
